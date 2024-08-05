@@ -1,0 +1,13 @@
+BACKEND
+-HECHO- correcion de controller login
+-HECHO- correcion de controller attendance
+-- cambiar el como se guarda la localizacion para que guarde una lista
+-- correcion de controller location
+
+
+FRONTEND
+-- cambiar logica login para que pueda valar al padre de familia
+-- agregar pantalla para la lista de hijos
+-- correcion de app para recibir la lista de localizaciones y haga un split
+-- agregar combo box para la lista de localizaciones que pueda escoger el padre de familia 
+-- agregar pantalla de administrativo 
