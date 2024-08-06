@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { check ,validationResult} = require('express-validator');
+const { check, validationResult } = require('express-validator');
 const { registerLocationStudent, getLocationStudent, getChildrenList } = require("../controller/location.controller");
 const jwt = require('jsonwebtoken');
 const key = process.env.JWT_SECRET;
@@ -23,10 +23,15 @@ router.post('/location/registerLocation', [
 
     (req, res, next) => {
         //validar token de autorizacion
-        const header = req.header('Authorization' || "");
-        const token = header.split(' ')[1];
+        const header = req.header("Authorization") || "";
+        const token = header.split(" ")[1];
         if (!token) {
             return res.status(403).send({ message: "Acceso denegado" }); //no hay token
+        }
+        //validar cargo del usuario en el token
+        const decodeToken = jwt.verify(token, key); //decodificar token
+        if (decodeToken.type != "Estudiante") {
+            return res.status(403).send({ message: "Acceso denegado" });//no es padre
         }
         //validar campos de la peticion
         const errors = validationResult(req);
@@ -40,17 +45,30 @@ router.post('/location/registerLocation', [
 //Ruta para obtener la localizacion de un estudiante
 router.get('/location/getLocationStudent/:matricula', [
     check('matricula')
-        .notEmpty().withMessage('Campo matricula obligatoria') 
-        .trim() 
-        .matches(/^[0-9]+$/).withMessage('matricula invalida'), 
+        .notEmpty().withMessage('Campo matricula obligatoria')
+        .trim()
+        .matches(/^[0-9]+$/).withMessage('matricula invalida'),
 ], (req, res, next) => {
+    //validar token de autorizacion
+    const header = req.header("Authorization") || "";
+    const token = header.split(" ")[1];
+    if (!token) {
+        return res.status(403).send({ message: "Acceso denegado" }); //no hay token
+    }
+    //validar cargo del usuario en el token
+    const decodeToken = jwt.verify(token, key); //decodificar token
+    if (decodeToken.type != "Padre") {
+        return res.status(403).send({ message: "Acceso denegado" });//no es padre
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+    console.log("Acceso concedido")
     next(); //continua al controlador
 },
     getLocationStudent); //controlador
+
 
 //Ruta para obtener la lista de hijos de un padre
 router.post('/location/getChildrenList', [
@@ -59,11 +77,11 @@ router.post('/location/getChildrenList', [
         .trim()
         .matches(/^[0-9]+$/).withMessage('telefono invalido')
         .isLength({ min: 10, max: 10 }).withMessage('telefono debe tener 10 digitos'),
-    ], (req, res, next) => {
+], (req, res, next) => {
     //validar token de autorizacion
-    const header = req.header("Authorization") || ""; 
-    const token = header.split(" ")[1]; 
-    if (!token ) {
+    const header = req.header("Authorization") || "";
+    const token = header.split(" ")[1];
+    if (!token) {
         return res.status(403).send({ message: "Acceso denegado" }); //no hay token
     }
     //validar cargo del usuario en el token

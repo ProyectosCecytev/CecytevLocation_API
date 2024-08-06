@@ -1,13 +1,11 @@
-
 const Student = require('../model/Estudiante.model');
 const Teacher = require('../model/Usuario.model');
 const Cargo = require('../model/Cargo.model');
-const express = require('express');
 const token = require('jsonwebtoken');
 const moment = require('moment');
-const { where } = require('sequelize');
 require('dotenv').config();
 const key = process.env.JWT_SECRET;
+
 /* DESCOMENTAR Y AGREGAR CREDENCIALES PARA USAR TWILIO Y BORRAR CREDENCIALES ANTES DE SUBIR A GITHUB
 variables para twilio
 const accountSid = ''; //Credencil 
@@ -19,7 +17,6 @@ const client = require('twilio')(accountSid, authToken);
 //tambien debe mandar mensaje a padre de familia
 const login = async (req, res) => {
     const { user, passwordUser } = req.body;
-    console.log("user: ", user + " password     " + passwordUser);
     try {
         const student = await Student.findOne({
             where: {
@@ -31,7 +28,6 @@ const login = async (req, res) => {
             var dateNow = moment().subtract(10, 'days').calendar();
             var datehour = moment().format('LT')
             //ENVIO DE MENSAES
-            console.log("ES UN ESTUDIANTE");
             const tokenStudent = token.sign({ id: user, type: "estudiante" }, key, { expiresIn: '40m' });
             res.status(200).header('auth-token', tokenStudent).send({
                 idUser: student.matricula,
@@ -60,15 +56,13 @@ const login = async (req, res) => {
                     type: cargo.cargo
                 });
             } else {
-                console.log("numero: " + passwordUser + "\n matricula: " + user);
                 const parent = await Student.findOne({
                     where: {
                         matricula: user,
                         telefono: passwordUser
                     }
                 });
-                if (parent) {
-                    //console.log("parent: ", parent);    
+                if (parent) {  
                     const tokenParent = token.sign({ id: user, type: "Padre" }, key, { expiresIn: '40m' });
                     res.status(200).header('auth-token', tokenParent).send({
                     idUser : passwordUser,
